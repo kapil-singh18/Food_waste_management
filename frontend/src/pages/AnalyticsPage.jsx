@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Field from '../components/ui/Field';
+import PageHeader from '../components/ui/PageHeader';
+import StatChip from '../components/ui/StatChip';
 
 function AnalyticsPage() {
   const [kitchenId, setKitchenId] = useState('kitchen-nyc-001');
@@ -16,32 +22,44 @@ function AnalyticsPage() {
   };
 
   return (
-    <div>
-      <h1>Waste Analytics</h1>
-      <div className="card form-grid">
-        <input value={kitchenId} onChange={(e) => setKitchenId(e.target.value)} placeholder="Kitchen ID" />
-        <button type="button" onClick={loadAnalytics}>Load Analytics</button>
-      </div>
+    <div className="stack">
+      <PageHeader
+        eyebrow="Impact Evidence"
+        title="Waste Analytics"
+        description="Turn daily kitchen data into sustainability insights to guide smarter planning and lower carbon-heavy waste."
+      />
+      <Card toned title="Load Kitchen Analytics">
+        <div className="form-grid">
+          <Field label="Kitchen ID" htmlFor="analytics-kitchen-id">
+            <input value={kitchenId} onChange={(e) => setKitchenId(e.target.value)} placeholder="Kitchen ID" id="analytics-kitchen-id" />
+          </Field>
+          <div className="form-action">
+            <Button id="load-analytics" type="button" onClick={loadAnalytics}>Load Analytics</Button>
+          </div>
+        </div>
+      </Card>
 
       {reportData && (
-        <div className="card">
-          <h3>Weekly Sustainability Report</h3>
-          <p>Total Waste: {reportData.totalWaste}</p>
-          <p>Waste Reduction %: {reportData.wasteReductionPercent}</p>
-          <p>Estimated Savings: ${reportData.estimatedSavings}</p>
-        </div>
+        <Card title="Weekly Sustainability Report">
+          <div className="stats-grid">
+            <StatChip label="Total waste" value={reportData.totalWaste} />
+            <StatChip label="Waste reduction %" value={reportData.wasteReductionPercent} />
+            <StatChip label="Estimated savings" value={`$${reportData.estimatedSavings}`} />
+          </div>
+        </Card>
       )}
 
       {dashboardData && (
-        <div className="card">
-          <h3>Dish-wise Waste</h3>
+        <Card title="Dish-wise Waste">
+          {(dashboardData.dishWiseWaste || []).length === 0 && <p className="empty-state">No dish-level waste records found yet.</p>}
           {(dashboardData.dishWiseWaste || []).map((row) => (
             <div className="row" key={row._id}>
               <strong>{row.dishName || 'Unknown Dish'}</strong>
               <span>Leftover: {row.totalLeftover}</span>
+              <Badge tone="warning">Track Closely</Badge>
             </div>
           ))}
-        </div>
+        </Card>
       )}
     </div>
   );

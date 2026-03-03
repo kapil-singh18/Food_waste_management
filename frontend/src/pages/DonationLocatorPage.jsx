@@ -6,6 +6,11 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import api from '../services/api';
+import Alert from '../components/ui/Alert';
+import Badge from '../components/ui/Badge';
+import Card from '../components/ui/Card';
+import Field from '../components/ui/Field';
+import PageHeader from '../components/ui/PageHeader';
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -78,26 +83,37 @@ function DonationLocatorPage() {
   }, [currentPosition, radiusKm, kitchenId]);
 
   return (
-    <div>
-      <h1>Nearest NGO Locator</h1>
-      <div className="card form-grid">
-        <input value={kitchenId} onChange={(e) => setKitchenId(e.target.value)} placeholder="Kitchen ID" />
-        <input
-          type="number"
-          min="1"
-          max="100"
-          value={radiusKm}
-          onChange={(e) => setRadiusKm(Number(e.target.value) || 10)}
-          placeholder="Radius (km)"
-        />
-      </div>
+    <div className="stack">
+      <PageHeader
+        eyebrow="Redistribution Network"
+        title="Nearest NGO Locator"
+        description="Route safe surplus to nearby community partners in real time and keep edible food in circulation."
+      />
+      <Card toned title="Search Radius">
+        <div className="form-grid">
+          <Field label="Kitchen ID" htmlFor="donation-kitchen-id">
+            <input id="donation-kitchen-id" value={kitchenId} onChange={(e) => setKitchenId(e.target.value)} placeholder="Kitchen ID" />
+          </Field>
+          <Field label="Radius (km)" htmlFor="radius-km">
+            <input
+              id="radius-km"
+              type="number"
+              min="1"
+              max="100"
+              value={radiusKm}
+              onChange={(e) => setRadiusKm(Number(e.target.value) || 10)}
+              placeholder="Radius (km)"
+            />
+          </Field>
+        </div>
+      </Card>
 
-      <div className="card">
-        <p>{status}</p>
-        {error && <p className="error">{error}</p>}
-      </div>
+      <Card title="Live Location Status">
+        <Alert tone="info">{status}</Alert>
+        {error && <Alert tone="error" ariaLive="assertive">{error}</Alert>}
+      </Card>
 
-      <div className="card">
+      <Card title="Map View">
         <div className="map-wrap">
           <MapContainer center={mapCenter} zoom={13} scrollWheelZoom className="ngo-map">
             <TileLayer
@@ -133,19 +149,18 @@ function DonationLocatorPage() {
             <RecenterMap position={currentPosition} />
           </MapContainer>
         </div>
-      </div>
+      </Card>
 
-      <div className="card">
-        <h3>Nearby NGOs</h3>
-        {ngos.length === 0 && <p>No NGOs found in selected radius.</p>}
+      <Card title="Nearby NGOs">
+        {ngos.length === 0 && <p className="empty-state">No NGOs found in the selected radius.</p>}
         {ngos.map((ngo) => (
           <div className="row" key={ngo._id}>
             <strong>{ngo.name}</strong>
-            <span>{ngo.distanceKm} km</span>
             <span>{ngo.phone}</span>
+            <Badge tone="success">{ngo.distanceKm} km away</Badge>
           </div>
         ))}
-      </div>
+      </Card>
     </div>
   );
 }

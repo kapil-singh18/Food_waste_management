@@ -23,7 +23,7 @@ const ingredientSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
-    reorderLevel: {
+    reorderDays: {
       type: Number,
       default: 0,
       min: 0

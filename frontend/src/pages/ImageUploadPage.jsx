@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Field from '../components/ui/Field';
+import PageHeader from '../components/ui/PageHeader';
 
 function ImageUploadPage() {
   const [file, setFile] = useState(null);
@@ -20,20 +25,29 @@ function ImageUploadPage() {
   };
 
   return (
-    <div>
-      <h1>Image Expiry Detection</h1>
-      <form className="card form-grid" onSubmit={submitImage}>
-        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-        <button type="submit">Check Expiry</button>
-      </form>
+    <div className="stack">
+      <PageHeader
+        eyebrow="Prevent Expiry Waste"
+        title="Image Expiry Detection"
+        description="Scan food labels quickly and act early before safe inventory becomes landfill waste."
+      />
+      <Card toned title="Upload Label Image">
+        <form className="form-grid" onSubmit={submitImage}>
+          <Field label="Food package image" htmlFor="expiry-file">
+            <input id="expiry-file" type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          </Field>
+          <div className="form-action">
+            <Button id="check-expiry-btn" type="submit">Check Expiry</Button>
+          </div>
+        </form>
+      </Card>
 
       {result && (
-        <div className="card">
-          <h3>Result</h3>
-          <p>Status: {result.status}</p>
+        <Card title="Scan Result">
+          <p>Status: <Badge tone={result.status === 'expired' ? 'danger' : 'success'}>{result.status}</Badge></p>
           <p>Confidence: {result.confidence}</p>
           <p>File: {result.filename}</p>
-        </div>
+        </Card>
       )}
     </div>
   );

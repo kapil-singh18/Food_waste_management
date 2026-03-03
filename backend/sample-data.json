@@ -20,7 +20,7 @@
     "name": "Rice",
     "stockQuantity": 85,
     "unit": "kg",
-    "reorderLevel": 20
+    "reorderDays": 7
   },
   "dishExample": {
     "kitchenId": "kitchen-nyc-001",

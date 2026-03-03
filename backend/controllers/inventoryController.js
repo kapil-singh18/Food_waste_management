@@ -3,9 +3,48 @@ const Dish = require('../models/Dish');
 
 const createIngredient = async (req, res, next) => {
   try {
-    const ingredient = await Ingredient.create(req.body);
+    const kitchenId = req.body.kitchenId;
+    const name = req.body.name?.trim();
+    const incomingStock = Number(req.body.stockQuantity) || 0;
+    const incomingUnit = req.body.unit?.trim();
+    const incomingReorderDays =
+      req.body.reorderDays === undefined ? undefined : Number(req.body.reorderDays);
+
+    const existing = await Ingredient.findOne({ kitchenId, name });
+
+    if (existing) {
+      if (existing.unit !== incomingUnit) {
+        return res.status(400).json({
+          success: false,
+          message: `Unit mismatch for "${name}". Existing unit is "${existing.unit}", received "${incomingUnit}".`
+        });
+      }
+
+      existing.stockQuantity += incomingStock;
+      if (incomingReorderDays !== undefined && !Number.isNaN(incomingReorderDays)) {
+        existing.reorderDays = incomingReorderDays;
+      }
+
+      await existing.save();
+      return res.status(200).json({
+        success: true,
+        message: `Updated "${name}" stock by +${incomingStock} ${incomingUnit}.`,
+        data: existing
+      });
+    }
+
+    const ingredient = await Ingredient.create({
+      ...req.body,
+      name
+    });
     return res.status(201).json({ success: true, data: ingredient });
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: `Ingredient "${req.body.name}" already exists for kitchen "${req.body.kitchenId}".`
+      });
+    }
     return next(error);
   }
 };
@@ -31,6 +70,12 @@ const updateIngredient = async (req, res, next) => {
     }
     return res.status(200).json({ success: true, data: ingredient });
   } catch (error) {
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: `Ingredient "${req.body.name}" already exists for this kitchen.`
+      });
+    }
     return next(error);
   }
 };

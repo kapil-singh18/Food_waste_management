@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import Alert from '../components/ui/Alert';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Field from '../components/ui/Field';
+import PageHeader from '../components/ui/PageHeader';
+import StatChip from '../components/ui/StatChip';
+import Badge from '../components/ui/Badge';
 
 function Dashboard() {
   const [form, setForm] = useState({
@@ -39,27 +46,55 @@ function Dashboard() {
   };
 
   return (
-    <div>
-      <h1>Demand Prediction Dashboard</h1>
-      <form className="card form-grid" onSubmit={submitPrediction}>
-        <input name="kitchenId" value={form.kitchenId} onChange={onChange} placeholder="Kitchen ID" />
-        <input name="pastConsumption" value={form.pastConsumption} onChange={onChange} placeholder="Past consumption CSV" />
-        <input name="dayOfWeek" value={form.dayOfWeek} onChange={onChange} placeholder="Day of Week" />
-        <input name="expectedPeople" value={form.expectedPeople} onChange={onChange} placeholder="Expected People" type="number" />
-        <input name="events" value={form.events} onChange={onChange} placeholder="Events CSV" />
-        <input name="weather" value={form.weather} onChange={onChange} placeholder="Weather" />
-        <button type="submit">Predict Demand</button>
-      </form>
+    <div className="stack">
+      <PageHeader
+        eyebrow="Forecast Mission"
+        title="Demand Prediction Dashboard"
+        description="Estimate demand before prep begins so your kitchen can reduce overproduction and redirect surplus responsibly."
+      />
 
-      {error && <p className="error">{error}</p>}
+      <Card toned title="Prediction Inputs">
+        <form className="form-grid" onSubmit={submitPrediction}>
+          <Field label="Kitchen ID" htmlFor="kitchen-id">
+            <input id="kitchen-id" name="kitchenId" value={form.kitchenId} onChange={onChange} placeholder="Kitchen ID" />
+          </Field>
+          <Field label="Past consumption (CSV)" htmlFor="past-consumption">
+            <input id="past-consumption" name="pastConsumption" value={form.pastConsumption} onChange={onChange} placeholder="Past consumption CSV" />
+          </Field>
+          <Field label="Day of week" htmlFor="day-of-week">
+            <input id="day-of-week" name="dayOfWeek" value={form.dayOfWeek} onChange={onChange} placeholder="Day of Week" />
+          </Field>
+          <Field label="Expected people" htmlFor="expected-people">
+            <input id="expected-people" name="expectedPeople" value={form.expectedPeople} onChange={onChange} placeholder="Expected People" type="number" />
+          </Field>
+          <Field label="Events (CSV)" htmlFor="events">
+            <input id="events" name="events" value={form.events} onChange={onChange} placeholder="Events CSV" />
+          </Field>
+          <Field label="Weather" htmlFor="weather">
+            <input id="weather" name="weather" value={form.weather} onChange={onChange} placeholder="Weather" />
+          </Field>
+          <div className="form-action">
+            <Button id="predict-submit" type="submit">Predict Demand</Button>
+          </div>
+        </form>
+      </Card>
+
+      {error && <Alert tone="error" ariaLive="assertive">{error}</Alert>}
 
       {result && (
-        <div className="card">
-          <h3>Prediction Result</h3>
-          <p>Predicted Quantity: {result.predictedQuantity}</p>
-          <p>Surplus Risk: {result.surplusRisk ? 'Yes' : 'No'}</p>
-          <p>Donation Recommended: {result.donationRecommended ? 'Yes' : 'No'}</p>
-        </div>
+        <Card title="Prediction Result">
+          <div className="stats-grid">
+            <StatChip label="Predicted quantity" value={result.predictedQuantity} />
+            <StatChip
+              label="Surplus risk"
+              value={result.surplusRisk ? <Badge tone="warning">High risk</Badge> : <Badge tone="success">Controlled</Badge>}
+            />
+            <StatChip
+              label="Donation route"
+              value={result.donationRecommended ? <Badge tone="success">Recommended</Badge> : <Badge tone="neutral">Not needed</Badge>}
+            />
+          </div>
+        </Card>
       )}
     </div>
   );
